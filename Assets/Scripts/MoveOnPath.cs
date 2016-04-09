@@ -19,7 +19,14 @@ public class MoveOnPath : MonoBehaviour {
 
 	void FixedUpdate() {
 		if (atTargetMovePoint()) {
-			setMovePoint(nextMovePointIndex());
+			setNextMovePoint();
+		}
+	}
+
+	void OnCollisionEnter(Collision hit) {
+		if (hit.gameObject.CompareTag("Bouncer")) {
+			navMeshAgent.Stop();
+			StartCoroutine(resumeAfterDelay());
 		}
 	}
 
@@ -32,15 +39,22 @@ public class MoveOnPath : MonoBehaviour {
 		return xDistance <= threshold && zDistance <= threshold;
 	}
 
-	private int nextMovePointIndex() {
+	private void setNextMovePoint() {
 		var movePointIndex = Array.IndexOf(movePoints, targetMovePoint);
 		var atLastMovePoint = (movePointIndex == movePoints.Length - 1);
 
-		return atLastMovePoint ? 0 : movePointIndex + 1;
+		setMovePoint(atLastMovePoint ? 0 : movePointIndex + 1);
 	}
 
 	private void setMovePoint(int index) {
 		targetMovePoint = movePoints[index];
 		navMeshAgent.SetDestination(targetMovePoint.position);
+	}
+
+	private IEnumerator resumeAfterDelay() {
+		yield return new WaitForSeconds(2);
+
+		setNextMovePoint();
+		navMeshAgent.Resume();
 	}
 }
