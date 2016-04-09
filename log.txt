@@ -1,0 +1,13 @@
+Started with Roll a Ball tutorial
+
+Used CharacterController for the player - considered RigidBody but wanted
+good directional movement support and ability to walk up steps etc
+
+Tried using CharacterController for the NPC as well but the movement script
+became quite complex; it made more sense in the end to use NavMeshAgent,
+which has built in path following
+
+Various problems with conflicting scripts - for example, turning Pickups into
+physics objects but forgetting to turn off the Rotator script meant that they
+slid strangely around the scene trying to rotate
+
