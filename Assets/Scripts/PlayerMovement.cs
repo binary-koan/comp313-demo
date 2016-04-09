@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using System.Collections;
 
 [RequireComponent(typeof (CharacterController))]
+[RequireComponent(typeof (PlayerDash))]
 public class PlayerMovement : MonoBehaviour {
 	public float speed = 3;
 	public float pushStrength = 5;
@@ -10,16 +11,12 @@ public class PlayerMovement : MonoBehaviour {
 	public float dashSpeedMultiplier = 2;
 	public float dashPushMultiplier = 10;
 
-	public Text dashDisplay;
-
 	private CharacterController characterController;
-
-	private const int MAX_DASH = 50;
-	private int dashRemaining = MAX_DASH;
-	private bool dashRecharging = false;
+	private PlayerDash dashController;
 
 	void Start() {
 		characterController = GetComponent<CharacterController>();
+		dashController = GetComponent<PlayerDash>();
 	}
 
 	void FixedUpdate() {
@@ -27,35 +24,20 @@ public class PlayerMovement : MonoBehaviour {
 			transform.TransformDirection(Vector3.forward) * verticalSpeed() +
 			transform.TransformDirection(Vector3.right) * horizontalSpeed();
 		
-		if (isDashing()) {
+		if (dashController.isDashing) {
 			movement *= dashSpeedMultiplier;
-
-			dashRecharging = false;
-			dashRemaining--;
-		} else if (!dashRecharging && (dashRemaining == 0 || (!isDashing() && dashRemaining < MAX_DASH))) {
-			dashRecharging = true;
-		} else if (dashRecharging && dashRemaining < MAX_DASH) {
-			dashRemaining++;
-
-			if (dashRemaining == MAX_DASH) {
-				dashRecharging = false;
-			}
 		}
 
 		characterController.SimpleMove(movement);
 	}
 
-	void Update() {
-		dashDisplay.text = "Dash: " + dashRemaining.ToString();
-	}
-
 	void OnControllerColliderHit(ControllerColliderHit hit) {
 		var other = hit.gameObject;
 
-		if (other.CompareTag("Pickup") && hit.rigidbody) {
+		if (other.CompareTag("Bouncer") && hit.rigidbody) {
 			var push = new Vector3(hit.moveDirection.x, 0, hit.moveDirection.z) * pushStrength;
 
-			if (isDashing()) {
+			if (dashController.isDashing) {
 				// Push the object harder and slightly upwards
 				push.y = 5;
 				push *= dashPushMultiplier;
@@ -71,9 +53,5 @@ public class PlayerMovement : MonoBehaviour {
 
 	private float verticalSpeed() {
 		return speed * Input.GetAxis("Vertical");
-	}
-
-	private bool isDashing() {
-		return !dashRecharging && Input.GetKey(KeyCode.Space) && dashRemaining > 0;
 	}
 }
