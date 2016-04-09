@@ -11,3 +11,7 @@ Various problems with conflicting scripts - for example, turning Pickups into
 physics objects but forgetting to turn off the Rotator script meant that they
 slid strangely around the scene trying to rotate
 
+Inconsistencies between components also became a problem - for example the fact
+that a CharacterController collides using OnControllerColliderHit, not
+OnCollisionEnter.
+

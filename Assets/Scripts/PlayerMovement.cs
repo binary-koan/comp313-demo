@@ -4,61 +4,36 @@ using System.Collections;
 [RequireComponent(typeof (CharacterController))]
 public class PlayerMovement : MonoBehaviour {
 	public float speed = 3;
-	public float rotateSpeed = 3;
+	public float pushStrength = 5;
 
 	private CharacterController characterController;
-	private bool moving4Directional = true;
 
-	// Use this for initialization
 	void Start() {
 		characterController = GetComponent<CharacterController>();
 	}
-	
-	// Update is called once per frame
+
 	void FixedUpdate() {
-		if (moving4Directional) {
-			move4Directional();
-		} else {
-			rotateAndMove();
+		var forwardMovement = transform.TransformDirection(Vector3.forward) * verticalSpeed();
+		var sidewaysMovement = transform.TransformDirection(Vector3.right) * horizontalSpeed();
+
+		characterController.SimpleMove(forwardMovement + sidewaysMovement);
+	}
+
+	void OnControllerColliderHit(ControllerColliderHit hit) {
+		var other = hit.gameObject;
+
+		if (other.CompareTag("Pickup") && hit.rigidbody) {
+			var pushDirection = new Vector3(hit.moveDirection.x, 0, hit.moveDirection.z);
+
+			other.GetComponent<Rigidbody>().AddForce(pushDirection * pushStrength);
 		}
 	}
 
-	void Update() {
-		if (Input.GetKey(KeyCode.E)) {
-			moving4Directional = !moving4Directional;
-		}
+	private float horizontalSpeed() {
+		return speed * Input.GetAxis("Horizontal");
 	}
 
-	void OnCollisionEnter(Collision collision) {
-		var other = collision.gameObject;
-
-		if (other.CompareTag("NPC")) {
-			other.SetActive(false);
-		}
-	}
-
-	private void move4Directional() {
-		var forwardMovement = forward() * currentSpeed();
-		var sidewaysMovement = transform.TransformDirection(Vector3.right) * currentRotation();
-		var upwardMovement = Vector3.up * speed * 100;
-		characterController.SimpleMove(forwardMovement + sidewaysMovement + upwardMovement);
-	}
-
-	private void rotateAndMove() {
-		transform.Rotate(0, currentRotation(), 0);
-
-		characterController.SimpleMove(forward() * currentSpeed());
-	}
-
-	private float currentRotation() {
-		return rotateSpeed * Input.GetAxis("Horizontal");
-	}
-
-	private float currentSpeed() {
+	private float verticalSpeed() {
 		return speed * Input.GetAxis("Vertical");
-	}
-
-	private Vector3 forward() {
-		return transform.TransformDirection(Vector3.forward);
 	}
 }
