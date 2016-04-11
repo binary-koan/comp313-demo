@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
+using System;
 
 [RequireComponent(typeof (CharacterController))]
 [RequireComponent(typeof (PlayerDash))]
@@ -13,13 +14,17 @@ public class PlayerMovement : MonoBehaviour {
 
 	private CharacterController characterController;
 	private PlayerDash dashController;
+    private Transform modelTransform;
+    private Animator modelAnimator;
 
 	void Start() {
 		characterController = GetComponent<CharacterController>();
 		dashController = GetComponent<PlayerDash>();
+        modelTransform = transform.GetChild(0);
+        modelAnimator = GetComponentInChildren<Animator>();
 	}
 
-	void FixedUpdate() {
+	void Update() {
 		var movement =
 			transform.TransformDirection(Vector3.forward) * verticalSpeed() +
 			transform.TransformDirection(Vector3.right) * horizontalSpeed();
@@ -29,9 +34,17 @@ public class PlayerMovement : MonoBehaviour {
 		}
 
 		characterController.SimpleMove(movement);
+
+        if (movement.magnitude > 0) {
+            modelTransform.LookAt(modelTransform.position + movement);
+            modelAnimator.SetBool("IsMoving", true);
+            modelAnimator.SetFloat("MovementSpeed", movement.magnitude);
+        } else {
+            modelAnimator.SetBool("IsMoving", false);
+        }
 	}
 
-	void OnControllerColliderHit(ControllerColliderHit hit) {
+    void OnControllerColliderHit(ControllerColliderHit hit) {
 		var other = hit.gameObject;
 
 		if (other.CompareTag("Bouncer") && hit.rigidbody) {
