@@ -11,13 +11,16 @@ public class MoveOnPath : MonoBehaviour {
 
 	private Transform targetMovePoint;
 	private NavMeshAgent navMeshAgent;
+    private Animator modelAnimator;
 
 	void Start() {
 		navMeshAgent = GetComponent<NavMeshAgent>();
+        modelAnimator = GetComponentInChildren<Animator>();
+        modelAnimator.SetFloat("MovementSpeed", speed);
 		setMovePoint(0);
 	}
 
-	void FixedUpdate() {
+	void Update() {
 		if (atTargetMovePoint()) {
 			setNextMovePoint();
 		}
@@ -26,6 +29,7 @@ public class MoveOnPath : MonoBehaviour {
 	void OnCollisionEnter(Collision hit) {
 		if (hit.gameObject.CompareTag("Bouncer")) {
 			navMeshAgent.Stop();
+            modelAnimator.SetBool("IsMoving", false);
 			StartCoroutine(resumeAfterDelay());
 		}
 	}
@@ -49,7 +53,8 @@ public class MoveOnPath : MonoBehaviour {
 	private void setMovePoint(int index) {
 		targetMovePoint = movePoints[index];
 		navMeshAgent.SetDestination(targetMovePoint.position);
-	}
+        modelAnimator.SetBool("IsMoving", true);
+    }
 
 	private IEnumerator resumeAfterDelay() {
 		yield return new WaitForSeconds(2);
