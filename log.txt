@@ -15,3 +15,12 @@ Inconsistencies between components also became a problem - for example the fact
 that a CharacterController collides using OnControllerColliderHit, not
 OnCollisionEnter.
 
+Another challenge was 3D positioning, movement and rotation - since I haven't done
+much 3D graphics I struggled to understand what many of the Vector and Quaternion
+operations were doing. It doesn't help that many components (CharacterController,
+RigidBody, NavMeshAgent) have their own methods to move the object.
+
+Decision: Originally the NPC used asynchronous events instead of a state machine
+to do things like paused states, but I decided that having an explicit State.PAUSED
+makes things more explicit and easier to work with despite the annoyance of incrementing
+and comparing pausedTime manually.
