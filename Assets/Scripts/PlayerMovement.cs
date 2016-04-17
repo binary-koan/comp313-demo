@@ -25,9 +25,7 @@ public class PlayerMovement : MonoBehaviour {
 	}
 
 	void Update() {
-		var movement =
-			transform.TransformDirection(Vector3.forward) * verticalSpeed() +
-			transform.TransformDirection(Vector3.right) * horizontalSpeed();
+		var movement = Vector3.forward * verticalSpeed() + Vector3.right * horizontalSpeed();
 		
 		if (dashController.isDashing) {
 			movement *= dashSpeedMultiplier;
@@ -36,7 +34,7 @@ public class PlayerMovement : MonoBehaviour {
 		characterController.SimpleMove(movement);
 
         if (movement.magnitude > 0) {
-            modelTransform.LookAt(modelTransform.position + movement);
+            transform.LookAt(transform.position + movement);
             modelAnimator.SetBool("IsMoving", true);
             modelAnimator.SetFloat("MovementSpeed", movement.magnitude);
         } else {
@@ -52,7 +50,7 @@ public class PlayerMovement : MonoBehaviour {
 
 			if (dashController.isDashing) {
 				// Push the object harder and slightly upwards
-				push.y = 5;
+				push.y = pushStrength;
 				push *= dashPushMultiplier;
 			}
 

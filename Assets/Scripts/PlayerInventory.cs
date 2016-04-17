@@ -66,11 +66,12 @@ public class PlayerInventory : MonoBehaviour {
 	private void addToInventory(GameObject item) {
 		item.SetActive(false);
 
-		var hudItem = (GameObject)Instantiate(inventoryItemDisplay, hudItemPosition(inventory.Count), Quaternion.identity);
+		var hudItem = (GameObject)Instantiate(inventoryItemDisplay, Vector3.zero, Quaternion.identity);
 		hudItem.SetActive(true);
 		hudItem.transform.SetParent(inventoryPanel.transform, false);
+        setHudItemPosition(hudItem, inventory.Count);
 
-		inventory.Add(new InventoryItem(item, hudItem));
+        inventory.Add(new InventoryItem(item, hudItem));
 	}
 
     private void dropFromInventory(InventoryItem inventoryItem) {
@@ -78,15 +79,20 @@ public class PlayerInventory : MonoBehaviour {
         inventory.RemoveAt(index);
 
         Destroy(inventoryItem.hudItem);
-        inventoryItem.item.transform.position = transform.position + Vector3.up;
+
+        inventoryItem.item.transform.localEulerAngles = Vector3.zero;
+        inventoryItem.item.transform.position = transform.position + Vector3.up + transform.TransformDirection(Vector3.forward);
+        inventoryItem.item.GetComponent<Rigidbody>().velocity = Vector3.up + transform.TransformDirection(Vector3.forward);
         inventoryItem.item.SetActive(true);
 
         for (var i = index; i < inventory.Count; i++) {
-            inventory[i].hudItem.transform.position = hudItemPosition(i);
+            setHudItemPosition(inventory[i].hudItem, i);
         }
     }
 
-    private Vector3 hudItemPosition(int index) {
-        return new Vector3(-150, -50 - 70 * index, 0);
+    private void setHudItemPosition(GameObject hudItem, int index) {
+        var itemTransform = (RectTransform)(hudItem.transform);
+
+        itemTransform.anchoredPosition = new Vector2(-150, -50 - 70 * index);
     }
 }
