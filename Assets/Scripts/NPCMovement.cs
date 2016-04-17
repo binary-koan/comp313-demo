@@ -14,7 +14,6 @@ public class NPCMovement : MonoBehaviour {
 
 	private const float STOPPING_DISTANCE_THRESHOLD = 0.2f;
     private const float PAUSE_SECONDS = 2;
-    private const float FOLLOW_PLAYER_DISTANCE = 5;
 
     private State state = State.MOVING;
     private float pausedTime = 0;
@@ -73,7 +72,7 @@ public class NPCMovement : MonoBehaviour {
     }
 
     private void moveOnPath() {
-        if (distanceToPlayer() < FOLLOW_PLAYER_DISTANCE) {
+        if (Input.GetKeyDown(KeyCode.F)) {
             setState(State.FOLLOWING_PLAYER);
         }
         else if (atTargetMovePoint()) {
@@ -82,7 +81,7 @@ public class NPCMovement : MonoBehaviour {
     }
 
     private void moveTowardsPlayer() {
-        if (distanceToPlayer() > FOLLOW_PLAYER_DISTANCE) {
+        if (Input.GetKeyDown(KeyCode.F)) {
             setState(State.MOVING);
         }
         else {
