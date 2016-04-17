@@ -1,19 +1,22 @@
 Started with Roll a Ball tutorial
 
-Used CharacterController for the player - considered RigidBody but wanted
-good directional movement support and ability to walk up steps etc
+Decision: Used CharacterController for the player - considered RigidBody but
+wanted good directional movement support and ability to walk up steps etc
 
-Tried using CharacterController for the NPC as well but the movement script
-became quite complex; it made more sense in the end to use NavMeshAgent,
+Decision: Tried using CharacterController for the NPC as well but the movement
+script became quite complex; it made more sense in the end to use NavMeshAgent,
 which has built in path following
 
-Various problems with conflicting scripts - for example, turning Pickups into
-physics objects but forgetting to turn off the Rotator script meant that they
-slid strangely around the scene trying to rotate
+Inconsistencies between components became a problem - for example the fact that
+a CharacterController collides using OnControllerColliderHit, not OnCollisionEnter.
 
-Inconsistencies between components also became a problem - for example the fact
-that a CharacterController collides using OnControllerColliderHit, not
-OnCollisionEnter.
+Decision: The easiest way to get models displaying on my existing player and NPC
+objects seemed to be making the model a child of the object. I considered just
+putting the model into the scene and setting up components in the same way, but
+that turned out to be a lot of effort and would have tied the objects to those
+specific models. Having the models as children enabled me to try out both
+designers' assets quickly and easily, and also meant I could control the transform
+(eg. rotation) of the model independently to the controller.
 
 Another challenge was 3D positioning, movement and rotation - since I haven't done
 much 3D graphics I struggled to understand what many of the Vector and Quaternion
@@ -22,5 +25,5 @@ RigidBody, NavMeshAgent) have their own methods to move the object.
 
 Decision: Originally the NPC used asynchronous events instead of a state machine
 to do things like paused states, but I decided that having an explicit State.PAUSED
-makes things more explicit and easier to work with despite the annoyance of incrementing
-and comparing pausedTime manually.
+makes things more explicit and easier to work with despite the annoyance of
+incrementing and comparing pausedTime manually.
