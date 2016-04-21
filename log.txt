@@ -1,14 +1,60 @@
-Started with Roll a Ball tutorial
+(Note: Lines in between dashes are extracts from my commit log to give you an idea
+of when particular decisions/problems happened)
 
-Decision: Used CharacterController for the player - considered RigidBody but
-wanted good directional movement support and ability to walk up steps etc
+---
+Recreated roll-a-ball tutorial project
+Add CharacterController-based player
+---
+
+Decision: Used CharacterController for the player - I considered using a
+RigidBody but decided that good directional movement support and ability to walk
+up steps etc. would be more important than physics support.
+
+---
+Make NPC move on a path with NavMeshAgent
+---
 
 Decision: Tried using CharacterController for the NPC as well but the movement
 script became quite complex; it made more sense in the end to use NavMeshAgent,
-which has built in path following
+which has built in path following. I might replace this with a custom pathfinding
+algorithm eventually (for the Additional Features) section but NavMesh works
+well for now.
 
-Inconsistencies between components became a problem - for example the fact that
-a CharacterController collides using OnControllerColliderHit, not OnCollisionEnter.
+---
+Make Pickups into RigidBodies
+Simplify character movement and enable pushing objects
+---
+
+Decision: I started out implementing two types of character movement, one where
+pressing Up/Down/Left/Right would move your character in that direction and one
+where pressing Left/Right would rotate the character. I ended up picking the
+first one because it's simpler and closer to what we're likely to do in Zumo.
+
+---
+Allow the player to dash, increasing speed and push power
+Separate player movement and dash scripts
+---
+
+Problem: My player movement script quickly became unwieldy because of all the
+boilerplate of vector arithmetic, input handling, recharging logic for dash,
+etc. This led me to look into having multiple scripts on the same object, which
+ended up working really well for both this and later inventory management.
+
+---
+Stop NPC on collision and restart with next waypoint after delay
+---
+
+Problem: Inconsistencies between components quickly became annoying, particularly
+collision handling - it took me quite a bit of investigation to figure out when to
+use OnCollisionEnter vs OnTriggerEnter vs OnControllerColliderHit, along with the
+different arguments each method takes. I'm still not sure I understand how Unity's
+collision system works, but after extensive searching and trying out combinations
+of things I'm much better at getting it to work in more cases.
+
+---
+Add assets from designers to project
+Use fox model for player and animate as they move
+---
 
 Decision: The easiest way to get models displaying on my existing player and NPC
 objects seemed to be making the model a child of the object. I considered just
@@ -16,19 +62,76 @@ putting the model into the scene and setting up components in the same way, but
 that turned out to be a lot of effort and would have tied the objects to those
 specific models. Having the models as children enabled me to try out both
 designers' assets quickly and easily, and also meant I could control the transform
-(eg. rotation) of the model independently to the controller.
+(eg. scale) of the model independently to the controller.
 
-Another challenge was 3D positioning, movement and rotation - since I haven't done
-much 3D graphics I struggled to understand what many of the Vector and Quaternion
-operations were doing. It doesn't help that many components (CharacterController,
-RigidBody, NavMeshAgent) have their own methods to move the object.
+Problem: 3D positioning, movement and rotation were challenging to understand -
+since I haven't done much 3D graphics it was hard to figure out what many of the
+Vector and Quaternion operations were doing. Again, it doesn't help that many
+components (CharacterController, RigidBody, NavMeshAgent) have different methods
+for moving the object with inconsistent names and behaviour.
+
+---
+Use textures from asset package for existing world objects
+Use fox character and animations for NPC
+Add trees as navmesh obstacles for the NPC
+Make NPC follow the player if they come close
+---
 
 Decision: Originally the NPC used asynchronous events instead of a state machine
 to do things like paused states, but I decided that having an explicit State.PAUSED
-makes things more explicit and easier to work with despite the annoyance of
-incrementing and comparing pausedTime manually.
+makes things clearer and easier to work with despite the annoyance of incrementing
+and comparing pausedTime manually.
 
-Couldn't get NPC collisions with CharacterController working (tried adding separate
-Collider components in various configurations and still couldn't make OnCollisionEnter
-detect anything) so had to extend the public interface of the NPC movement components
-so that the player movement component could pause them from the outside.
+---
+Allow picking up objects into an invisible inventory
+Display current inventory in a Panel
+Fix characters group positioning
+Allow dropping items from inventory
+---
+
+Problem: I struggled to get inventory items positioned properly on the HUD (the
+positions I was setting seemed to be scaled and adjusted weirdly before being
+applied to the object), but I eventually realised that I needed to use
+RectTransform rather than just Transform for setting their position. My error there
+was jumping into UI assuming it would be just like the rest of the scene, so the
+solution was simply to look at more tutorials and help articles about UI specifically.
+
+---
+Add second NPC to collaborate with the first
+---
+
+Problem: I wanted half of my NPC's state controller (pausing on collision) to be the
+same on the second NPC, but for the movement logic to be different. However, I couldn't
+find a good way of factoring the state machine into 2 parts so I ended up implementing
+the (simpler) second NPC using asynchronous coroutines, in the same way as I originally
+did the first one. That at least keeps the code simple, although it's not entirely clear
+that both controllers are doing a similar thing in a different way.
+
+---
+Stop NPCs on collision with player
+---
+
+Problem: Despite all my work understanding collisions earlier in the project, I couldn't
+get NPC collisions with CharacterController working (I tried adding separate Collider
+components in various configurations and still couldn't make OnCollisionEnter
+detect anything) so I ended up extending the public interface of the NPC movement components
+so that the player movement component could pause them from the outside. This solution looks
+quite nasty because of the two types of movement, and I wouldn't like to have it as a
+permanent solution, but it does make collisions work.
+
+===
+
+My finished "game" has the following features
+
+- Player-controlled character which can move around the stage with WASD or the arrow keys
+- A "dash" ability (hold down Space) which allows the player to move faster for a short
+  amount of time
+- Physics objects which can be pushed slowly (run into them when not dashing) or "thrown"
+  violently (run into them while dashing)
+- An NPC which alternates between following a set path (represented by a set of PathPoint
+  objects) and following the player. The movement style can be toggled by pressing F. The
+  NPC will stop moving if it hits a physics object or the player, and will start moving
+  again towards the next path point after a short delay
+- A second NPC which attempts to get on the opposite side of the player to the first NPC
+  in order to cut them off
+- Trees and walls, which cannot be pushed and function as NavMesh obstacles for the NPCs
