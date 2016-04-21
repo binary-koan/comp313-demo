@@ -3,8 +3,8 @@ using System;
 using System.Collections;
 
 [RequireComponent(typeof(NavMeshAgent))]
-public class NPCMovement : MonoBehaviour {
-    enum State {
+public class NPCStandardMovement : MonoBehaviour {
+    public enum State {
         MOVING, FOLLOWING_PLAYER, PAUSED
     }
 
@@ -44,12 +44,16 @@ public class NPCMovement : MonoBehaviour {
 	}
 
 	void OnCollisionEnter(Collision hit) {
-		if (hit.gameObject.CompareTag("Bouncer") || hit.gameObject.CompareTag("Player")) {
-            setState(State.PAUSED);
+		if (hit.gameObject.CompareTag("Pickup")) {
+            SetState(State.PAUSED);
 		}
 	}
 
-    private void setState(State newState) {
+    public void SetState(State newState) {
+        if (state == newState) {
+            return;
+        }
+
         state = newState;
 
         switch (state) {
@@ -73,7 +77,7 @@ public class NPCMovement : MonoBehaviour {
 
     private void moveOnPath() {
         if (Input.GetKeyDown(KeyCode.F)) {
-            setState(State.FOLLOWING_PLAYER);
+            SetState(State.FOLLOWING_PLAYER);
         }
         else if (atTargetMovePoint()) {
             setNextMovePoint();
@@ -82,7 +86,7 @@ public class NPCMovement : MonoBehaviour {
 
     private void moveTowardsPlayer() {
         if (Input.GetKeyDown(KeyCode.F)) {
-            setState(State.MOVING);
+            SetState(State.MOVING);
         }
         else {
             navMeshAgent.destination = player.transform.position;
@@ -93,12 +97,11 @@ public class NPCMovement : MonoBehaviour {
         pausedTime += Time.deltaTime;
 
         if (pausedTime >= PAUSE_SECONDS) {
-            setState(State.MOVING);
+            SetState(State.MOVING);
         }
     }
 
 	private bool atTargetMovePoint() {
-		//TODO: Is there a better way to test this?
 		var xDistance = Math.Abs(transform.position.x - targetMovePoint.position.x);
 		var zDistance = Math.Abs(transform.position.z - targetMovePoint.position.z);
 		var threshold = navMeshAgent.stoppingDistance + STOPPING_DISTANCE_THRESHOLD;

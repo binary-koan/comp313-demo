@@ -27,3 +27,8 @@ Decision: Originally the NPC used asynchronous events instead of a state machine
 to do things like paused states, but I decided that having an explicit State.PAUSED
 makes things more explicit and easier to work with despite the annoyance of
 incrementing and comparing pausedTime manually.
+
+Couldn't get NPC collisions with CharacterController working (tried adding separate
+Collider components in various configurations and still couldn't make OnCollisionEnter
+detect anything) so had to extend the public interface of the NPC movement components
+so that the player movement component could pause them from the outside.

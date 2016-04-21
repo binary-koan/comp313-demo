@@ -45,7 +45,7 @@ public class PlayerMovement : MonoBehaviour {
     void OnControllerColliderHit(ControllerColliderHit hit) {
 		var other = hit.gameObject;
 
-		if (other.CompareTag("Bouncer") && hit.rigidbody) {
+		if (other.CompareTag("Pickup") && hit.rigidbody) {
 			var push = new Vector3(hit.moveDirection.x, 0, hit.moveDirection.z) * pushStrength;
 
 			if (dashController.isDashing) {
@@ -56,6 +56,20 @@ public class PlayerMovement : MonoBehaviour {
 
 			other.GetComponent<Rigidbody>().AddForce(push);
 		}
+        else if (other.CompareTag("NPC")) {
+            // For some reason NPCs don't register collisions with the player, so here
+            // we attempt to tell the NPC to stop moving. This is just about OK in the case
+            // of 2 NPCs but it's definitely not a long-term solution
+            var standardMovement = other.GetComponent<NPCStandardMovement>();
+            if (standardMovement) {
+                standardMovement.SetState(NPCStandardMovement.State.PAUSED);
+            }
+
+            var predictiveMovement = other.GetComponent<NPCPredictiveMovement>();
+            if (predictiveMovement) {
+                predictiveMovement.PauseMovement();
+            }
+        }
 	}
 
 	private float horizontalSpeed() {

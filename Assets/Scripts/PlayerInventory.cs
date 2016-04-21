@@ -56,7 +56,7 @@ public class PlayerInventory : MonoBehaviour {
 	}
 
 	private bool canPickUp(GameObject item) {
-		return item.CompareTag("Bouncer");
+		return item.CompareTag("Pickup");
 	}
 
     private bool isBeside(GameObject item) {
